@@ -22,14 +22,16 @@ class Diary(Base):
     now = datetime.utcnow()
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(String, ForeignKey('diary_users.name'))
-    date = Column(Date, nullable=False)
-    title = Column(String)
-    content = Column(Text)
-    image_type = Column(String)
+    user_id = Column(
+        String,
+        ForeignKey('diary_users.name')
+    )
+    date = Column(Date)
+    title = Column(String, nullable=True)
+    content = Column(Text, nullable=True)
+    image_type = Column(String, nullable=True)
     updated_at = Column(
-        DateTime,
-        nullable=False,
+        DateTime(timezone=True),
         default=utc.localize(now).astimezone(KST)
     )
 

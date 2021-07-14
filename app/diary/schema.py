@@ -1,4 +1,3 @@
-from datetime import date
 from typing import Dict, Optional, List
 
 from pydantic import BaseModel
@@ -6,9 +5,9 @@ from pydantic import BaseModel
 
 class DiaryBase(BaseModel):
     user_id: str
-    date: date
+    date: str
 
-    class Config():
+    class Config:
         orm_mode = True
 
 
@@ -19,7 +18,7 @@ class Diary(DiaryBase):
 
 
 class ShowDiary(BaseModel):
-    body: Dict[date, Diary] = {}
+    body: Dict[str, List[Diary]] = {}
 
 
 class User(BaseModel):
