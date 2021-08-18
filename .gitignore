@@ -1,6 +1,7 @@
 __pycache__
 app/__pycache__
 app/diary/__pycache__
+app/diary/diary.db
 venv
 .idea
 app/.deta
