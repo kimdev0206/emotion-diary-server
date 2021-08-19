@@ -24,7 +24,7 @@ class ShowDiary(BaseModel):
 
 class DiaryYear(BaseModel):
     emotion_type: str
-    year_count: int
+    year_count: int = 0
     color: Optional[str] = None
 
 

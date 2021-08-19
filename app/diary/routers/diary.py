@@ -19,7 +19,6 @@ router = APIRouter(
 )
 
 EMOTION_COLOR = {
-    # TODO: POST 요청시 validate 해주기
     "blue": "backgroundColor2",
     "unknown": "backgroundColor3",
     "happy": "backgroundColor4",
@@ -43,12 +42,12 @@ def show_diary(
         if not diaries:
             raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f'Diary with the id {user_id} is not available'
+                    detail=f'user_id: {user_id}는 이용가능하지 않습니다.'
                 )
         emotion_count_dict = Counter([each.image_type for each in diaries])
 
         result = defaultdict(list)
-        for emotion in emotion_count_dict:
+        for emotion in EMOTION_COLOR:
             result[year].append(DiaryYear(
                 emotion_type=emotion,
                 year_count=emotion_count_dict[emotion],
@@ -68,16 +67,17 @@ def show_diary(
     return {"body": result}
 
 
-@router.post(
-    '/',
-    status_code=status.HTTP_201_CREATED,
-    response_model=DiarySchema
-)
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=DiarySchema)
 def create_diary(
         request: DiarySchema,
         db: Session = Depends(get_db),
         # current_user: UserSchema = Depends(get_current_user)
         ):
+    if request.image_type not in EMOTION_COLOR:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'{request.image_type}은 잘못된 감정타입 입니다.'
+        )
     exist_diary = db.query(Diary).filter(
         and_(Diary.user_id == request.user_id,
              Diary.date == request.date)
@@ -95,11 +95,7 @@ def create_diary(
     return new_diary
 
 
-@router.delete(
-    '/',
-    status_code=status.HTTP_204_NO_CONTENT,
-    response_class=Response
-)
+@router.delete('/', status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
 def destroy_diary(
         request: DiaryBase,
         db: Session = Depends(get_db),
