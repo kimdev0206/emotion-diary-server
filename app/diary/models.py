@@ -9,6 +9,7 @@ from sqlalchemy import (
     Text,
     DateTime,
     ForeignKey,
+    BOOLEAN
 )
 from sqlalchemy.orm import relationship
 
@@ -47,3 +48,25 @@ class User(Base):
     hashedpassword = Column(String)
 
     diaries = relationship("Diary", back_populates="creator")
+    tokens = relationship("PushMailToken", back_populates="creator")
+
+
+class PushMailToken(Base):
+    __tablename__ = 'push_mail_token'
+
+    KST = timezone('Asia/Seoul')
+    now = datetime.utcnow()
+
+    id = Column(Integer, primary_key=True, index=True)
+    token = Column(String, unique=True)
+    username = Column(
+        String,
+        ForeignKey('diary_user.name')
+    )
+    is_subscribe = Column(BOOLEAN)
+    updated_at = Column(
+        DateTime(timezone=True),
+        default=utc.localize(now).astimezone(KST)
+    )
+
+    creator = relationship("User", back_populates="tokens")
