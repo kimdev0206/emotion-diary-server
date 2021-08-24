@@ -7,11 +7,10 @@ from sqlalchemy import and_, extract
 
 from ..database import get_db
 from ..models import Diary, User
-from ..schema import Diary as DiarySchema
-from ..schema import User as UserSchema
-from ..schema import DiaryBase, ShowDiary, ShowDiaryYear, DiaryYear
 from ..authentication.oauth2 import get_current_user
-
+from ..schemas.auth import User as UserSchema
+from ..schemas.diary import Diary as DiarySchema
+from ..schemas.diary import DiaryBase, ShowDiary, ShowDiaryYear, DiaryYear
 
 router = APIRouter(
     prefix='/diary',
