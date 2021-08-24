@@ -18,7 +18,7 @@ def create_user(request: UserSchema, db: Session = Depends(get_db)):
     new_user = User(
         name=request.name,
         email=request.email,
-        password=Hash.bcrypt(request.password)
+        hashedpassword=Hash.bcrypt(request.password)
     )
     db.add(new_user)
     db.commit()

@@ -29,23 +29,22 @@ EMOTION_COLOR = {
 
 @router.get('/', response_model=Union[ShowDiary, ShowDiaryYear])
 def show_diary(
-        user_id: str = None,
+        username: str = None,
         year: str = None,
         db: Session = Depends(get_db),
         # current_user: UserSchema = Depends(get_current_user)
         ):
-    if year and user_id:
+    if year and username:
         diaries = db.query(Diary).join(User).filter(
-            and_(Diary.user_id == user_id,
+            and_(Diary.username == username,
                  extract('year', Diary.date) == year)
         ).all()
         if not diaries:
             raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f'user_id: {user_id}는 이용가능하지 않습니다.'
+                    detail=f'username: {username}는 이용가능하지 않습니다.'
                 )
         emotion_count_dict = Counter([each.image_type for each in diaries])
-
         result = defaultdict(list)
         for emotion in EMOTION_COLOR:
             result[year].append(DiaryYear(
@@ -54,11 +53,16 @@ def show_diary(
                 color=EMOTION_COLOR[emotion]
             ))
         return {"body": result}
-    elif not user_id and year:
+    elif not username and not year:
         diaries = db.query(Diary).all()
     else:
-        # and_(Diary.user_id == user_id, User.email == current_user)
-        diaries = db.query(Diary).join(User).filter(Diary.user_id == user_id).all()
+        # and_(Diary.username == username, User.email == current_user)
+        diaries = db.query(Diary).join(User).filter(Diary.username == username).all()
+        if not diaries:
+            raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f'{username}의 데이터는 존재하지 않습니다.'
+                )
     result = defaultdict(list)
     for each in diaries:
         key_date = each.date.strftime("%Y%m%d")
@@ -79,18 +83,24 @@ def create_diary(
             detail=f'{request.image_type}은 잘못된 감정타입 입니다.'
         )
     exist_diary = db.query(Diary).filter(
-        and_(Diary.user_id == request.user_id,
+        and_(Diary.username == request.username,
              Diary.date == request.date)
     ).first()
 
     if exist_diary:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f'{request.user_id}님의 {request.date} 내용이 존재합니다.'
+            detail=f'{request.username}님의 {request.date} 내용이 존재합니다.'
         )
     new_diary = Diary(**request.dict())
-    db.add(new_diary)
-    db.commit()
+    try:
+        db.add(new_diary)
+        db.commit()
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=e
+        )
     db.refresh(new_diary)
     return new_diary
 
@@ -102,14 +112,14 @@ def destroy_diary(
         # current_user: UserSchema = Depends(get_current_user)
         ) -> None:
     exist_diary = db.query(Diary).filter(
-        and_(Diary.user_id == request.user_id,
+        and_(Diary.username == request.username,
              Diary.date == request.date)
     )
 
     if not exist_diary.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"{request.user_id}님의 {request.date} 내용이 없습니다."
+            detail=f"{request.username}님의 {request.date} 내용이 없습니다."
         )
     exist_diary.delete(synchronize_session=False)
     db.commit()

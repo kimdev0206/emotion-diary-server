@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 
 class DiaryBase(BaseModel):
-    user_id: str
+    username: str
     date: date
 
     class Config:

@@ -6,3 +6,5 @@ bcrypt
 python-jose
 python-multipart
 pytz
+pymysql
+pyyaml

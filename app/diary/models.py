@@ -22,9 +22,9 @@ class Diary(Base):
     now = datetime.utcnow()
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(
+    username = Column(
         String,
-        ForeignKey('diary_users.name')
+        ForeignKey('diary_user.name')
     )
     date = Column(Date)
     title = Column(String, nullable=True)
@@ -39,11 +39,11 @@ class Diary(Base):
 
 
 class User(Base):
-    __tablename__ = 'diary_users'
+    __tablename__ = 'diary_user'
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True)
     email = Column(String)
-    password = Column(String)
+    hashedpassword = Column(String)
 
     diaries = relationship("Diary", back_populates="creator")
