@@ -9,7 +9,8 @@ from sqlalchemy import (
     Text,
     DateTime,
     ForeignKey,
-    BOOLEAN
+    BOOLEAN,
+    JSON
 )
 from sqlalchemy.orm import relationship
 
@@ -35,6 +36,7 @@ class Diary(Base):
         DateTime(timezone=True),
         default=utc.localize(now).astimezone(KST)
     )
+    category_json = Column(JSON)
 
     creator = relationship("User", back_populates="diaries")
 
