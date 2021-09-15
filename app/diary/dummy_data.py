@@ -7,8 +7,8 @@ class ModelName(str, Enum):
 
 
 class EmotionColor(str, Enum):
-    blue = "backgroundColor2"
-    unknown = "backgroundColor3"
-    happy = "backgroundColor4"
-    mood = "backgroundColor5"
     angry = "backgroundColor6"
+    happy = "backgroundColor4"
+    sensitiveness = "backgroundColor3"
+    blue = "backgroundColor2"
+    timid = "backgroundColor5"

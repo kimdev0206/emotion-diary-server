@@ -3,7 +3,9 @@ from datetime import date
 
 from pydantic import BaseModel, Json, validator
 
-from ..dummy_data import ModelName
+from ..dummy_data import ModelName, EmotionColor
+
+EMOTION_COLOR_LIST = [each.name for each in EmotionColor]
 
 
 class DiaryBase(BaseModel):
@@ -20,28 +22,27 @@ class Diary(DiaryBase):
     image_type: str
 
     @validator('image_type')
-    def image_type_contain(cls, value):
-        # TODO: Extract Enum name
-        if value not in ["blue", "unknown", "happy", "mood", "angry"]:
-            raise ValueError('Hmm...')
+    def image_type_match(cls, value):
+        if value not in EMOTION_COLOR_LIST:
+            raise ValueError(f'{value} is not match')
         return value
 
 
 class DiaryCategory(BaseModel):
-    weather: Optional[List[str]] = None
+    weather: Optional[str] = None
     activity: Optional[List[str]] = None
 
     @validator('weather')
-    def weather_contain(cls, target_list):
-        # TODO: Need order
-        if not all(target in ["해", "비", "구름", "눈"] for target in target_list):
-            raise ValueError('Hmm...')
-        return target_list
+    def weather_match(cls, value):
+        # TODO: Need order?
+        if value not in ["해", "비", "구름", "눈"]:
+            raise ValueError(f'{value} is not match')
+        return value
             
     @validator('activity')
-    def activity_contain(cls, target_list):
+    def activity_match(cls, target_list):
         if not all(target in ["공부", "운동", "게임", "여행", "만남"] for target in target_list):
-            raise ValueError('Hmm...')
+            raise ValueError(f'{target_list} is not match')
         return target_list
 
 
