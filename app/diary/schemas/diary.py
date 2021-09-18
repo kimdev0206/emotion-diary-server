@@ -11,13 +11,13 @@ EMOTION_COLOR_LIST = [each.name for each in EmotionColor]
 class DiaryBase(BaseModel):
     username: ModelName
     date: date
+    title: str
 
     class Config:
         orm_mode = True
 
 
 class Diary(DiaryBase):
-    title: str
     content: str
     image_type: str
 

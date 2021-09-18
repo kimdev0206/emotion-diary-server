@@ -1,9 +1,7 @@
 from collections import defaultdict, Counter
 from typing import List
-import json
 
 from fastapi import APIRouter, Depends, status, HTTPException, Response, Body
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, extract
 
@@ -60,7 +58,6 @@ def show_all_diary(
     result = defaultdict(list)
     for each in diaries:
         key_date = each.date.strftime("%Y%m%d")
-        each.category_json = json.dumps(each.category_json)
         result[key_date].append(each)
 
     return {"meta": ShowCountMeta(diary_count=len(diaries), day_count=len(result)),
@@ -75,8 +72,11 @@ def show_diary(
         ):
     diaries: List[DiaryRead] = []
     if username:
-        # and_(Diary.username == username, User.email == current_user)
-        diaries = db.query(Diary).join(User).filter(Diary.username == username).all()
+        diaries = db.query(Diary).join(User).filter(
+            and_(Diary.username == username
+                 # User.email == current_user
+             )
+        ).all()
         if not diaries:
             raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -85,7 +85,6 @@ def show_diary(
     result = defaultdict(list)
     for each in diaries:
         key_date = each.date.strftime("%Y%m%d")
-        # each.category_json = json.dumps(each.category_json)
         result[key_date].append(each)
 
     return {"meta": ShowCountMeta(diary_count=len(diaries), day_count=len(result)),
@@ -94,21 +93,20 @@ def show_diary(
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=DiaryRead)
 def create_diary(
-        request: DiaryRead = Body(...),
+        request: DiaryRead,
         db: Session = Depends(get_db),
         # current_user: UserSchema = Depends(get_current_user)
         ):
     exist_diary = db.query(Diary).filter(
         and_(Diary.username == request.username,
-             Diary.date == request.date)
+             Diary.date == request.date,
+             Diary.title == request.title)
     ).first()
-
     if exist_diary:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f'{request.username}님의 {request.date} 내용이 존재합니다.'
         )
-    # request.category_json = jsonable_encoder(request.category_json)
     new_diary = Diary(**request.dict())
     try:
         db.add(new_diary)
@@ -130,9 +128,9 @@ def destroy_diary(
         ) -> None:
     exist_diary = db.query(Diary).filter(
         and_(Diary.username == request.username,
-             Diary.date == request.date)
+             Diary.date == request.date,
+             Diary.title == request.title)
     )
-
     if not exist_diary.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -140,4 +138,3 @@ def destroy_diary(
         )
     exist_diary.delete(synchronize_session=False)
     db.commit()
-
