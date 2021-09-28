@@ -12,3 +12,11 @@ class EmotionColor(str, Enum):
     sensitiveness = "backgroundColor3"
     blue = "backgroundColor2"
     timid = "backgroundColor5"
+
+
+tags_metadata = [
+    {
+        "name": "Auth",
+        "description": "username key 에는 email 을 기입하세요."
+    }
+]

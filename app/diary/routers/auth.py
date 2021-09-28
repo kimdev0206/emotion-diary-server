@@ -22,14 +22,12 @@ def login(
         db: Session = Depends(get_db)
         ):
     user = db.query(User).filter(User.email == request.username).first()
-
-    # TODO: util.py 로 빼기
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'Invalid Credentials'
         )
-    if not Hash.verify(user.password, request.password):
+    if not Hash.verify(user.hashedpassword, request.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f'Incorrect password'
