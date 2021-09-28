@@ -8,3 +8,6 @@ python-multipart
 pytz
 pymysql
 pyyaml
+pyfcm
+firebase_admin
+google.auth
